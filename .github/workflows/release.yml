@@ -32,12 +32,22 @@ jobs:
     - name: Build project
       run: dotnet build ${{ vars.PROJECT_PATH }} --configuration Release --no-restore
 
-    - name: Publish project
+    - name: Publish project for win-x64
       run: >
         dotnet publish ${{ vars.PROJECT_PATH }}
         --configuration Release
-        --output ${{ vars.OUTPUT_DIR }}
+        --output "${{ vars.OUTPUT_DIR }}/x64"
         -r win-x64
+        --self-contained true
+        -p:PublishSingleFile=true
+        -p:IncludeNativeLibrariesForSelfExtract=true
+
+    - name: Publish project for win-x86
+      run: >
+        dotnet publish ${{ vars.PROJECT_PATH }}
+        --configuration Release
+        --output "${{ vars.OUTPUT_DIR }}/x86"
+        -r win-x86
         --self-contained true
         -p:PublishSingleFile=true
         -p:IncludeNativeLibrariesForSelfExtract=true
@@ -68,14 +78,45 @@ jobs:
         echo "Determined Release Tag: ${TAG_NAME}"
         echo "Determined Release Version: ${VERSION}"
 
-    - name: Archive publish output
+    - name: Prepare Release Assets
       shell: pwsh
       run: |
-        $exe = Get-ChildItem ${{ vars.OUTPUT_DIR }} -Filter *.exe | Select-Object -First 1
-        $zipFileName = "${{ vars.APP_NAME }}-${{ env.RELEASE_VERSION }}.zip"
-        Compress-Archive -Path $exe.FullName -DestinationPath $zipFileName -Force
-        Add-Content -Path $env:GITHUB_ENV -Value "ASSET_PATH=./$zipFileName"
-        Add-Content -Path $env:GITHUB_ENV -Value "ASSET_NAME=$zipFileName"
+        $appBaseName = "${{ vars.APP_NAME }}-${{ env.RELEASE_VERSION }}"
+        $assetPathsToUpload = New-Object System.Collections.Generic.List[string]
+
+        # Prepare x64 asset
+        $outputDirX64 = "${{ vars.OUTPUT_DIR }}/x64"
+        $publishedExeX64 = Get-ChildItem -Path $outputDirX64 -Filter *.exe | Select-Object -First 1
+        if (-not $publishedExeX64) {
+          Write-Error "Error: No x64 .exe file found in output directory '$outputDirX64'."
+          exit 1
+        }
+        $assetNameX64 = "$appBaseName-x64$($publishedExeX64.Extension)"
+        $assetPathForUploadX64 = Join-Path -Path "." -ChildPath $assetNameX64 # Place in workspace root
+        Copy-Item -Path $publishedExeX64.FullName -Destination $assetPathForUploadX64 -Force
+        $assetPathsToUpload.Add($assetPathForUploadX64)
+        Write-Host "Prepared x64 asset: $assetNameX64 at $assetPathForUploadX64"
+        Add-Content -Path $env:GITHUB_ENV -Value "ASSET_NAME_X64=$assetNameX64"
+
+        # Prepare x86 asset
+        $outputDirX86 = "${{ vars.OUTPUT_DIR }}/x86"
+        $publishedExeX86 = Get-ChildItem -Path $outputDirX86 -Filter *.exe | Select-Object -First 1
+        if (-not $publishedExeX86) {
+          Write-Error "Error: No x86 .exe file found in output directory '$outputDirX86'."
+          exit 1
+        }
+        $assetNameX86 = "$appBaseName-x86$($publishedExeX86.Extension)"
+        $assetPathForUploadX86 = Join-Path -Path "." -ChildPath $assetNameX86 # Place in workspace root
+        Copy-Item -Path $publishedExeX86.FullName -Destination $assetPathForUploadX86 -Force
+        $assetPathsToUpload.Add($assetPathForUploadX86)
+        Write-Host "Prepared x86 asset: $assetNameX86 at $assetPathForUploadX86"
+        Add-Content -Path $env:GITHUB_ENV -Value "ASSET_NAME_X86=$assetNameX86"
+
+        # Set environment variable for the 'files' parameter in the release step
+        # Use a glob pattern that matches both prepared assets in the workspace root
+        $assetGlobPattern = "./$appBaseName-*.exe"
+        Add-Content -Path $env:GITHUB_ENV -Value "ASSET_FILES_GLOB=$assetGlobPattern"
+        Write-Host "Asset glob pattern for release: $assetGlobPattern"
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
@@ -90,9 +131,10 @@ jobs:
           Commit: `${{ github.sha }}`
 
           **Artifacts:**
-          - `${{ env.ASSET_NAME }}` (Application files)
+          - `${{ env.ASSET_NAME_X64 }}` (Windows x64)
+          - `${{ env.ASSET_NAME_X86 }}` (Windows x86)
         draft: false
         prerelease: ${{ !startsWith(github.ref, 'refs/tags/v') }}
-        files: ${{ env.ASSET_PATH }}
+        files: ${{ env.ASSET_FILES_GLOB }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

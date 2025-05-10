@@ -8,10 +8,39 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>orange.ico</ApplicationIcon>
+    <RepositoryUrl>https://github.com/stephenasuncionDEV/color-picker.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>orange-128x128.png</PackageIcon>
+    <Description>Simple Color Picker by Typedef</Description>
+    <PackageProjectUrl>https://github.com/stephenasuncionDEV/color-picker</PackageProjectUrl>
+    <Copyright>Typedef</Copyright>
+    <FileVersion>2.1.0</FileVersion>
+    <Company>Typedef</Company>
+    <Authors>stephenasuncion</Authors>
+    <AssemblyName>Color Picker by Typedef</AssemblyName>
+    <AssemblyTitle>A simple color picker made with .NET Windows Forms.</AssemblyTitle>
+    <PackageId>color-picker-typedef</PackageId>
+    <Product>Color Picker by Typedef</Product>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="orange.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="orange-128x128.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="orange.ico">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
