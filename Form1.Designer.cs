@@ -74,7 +74,7 @@
             // 
             // hexTxt
             // 
-            hexTxt.Location = new Point(44, 226);
+            hexTxt.Location = new Point(47, 197);
             hexTxt.Name = "hexTxt";
             hexTxt.ReadOnly = true;
             hexTxt.Size = new Size(118, 23);
@@ -101,7 +101,7 @@
             // 
             // rgbTxt
             // 
-            rgbTxt.Location = new Point(44, 197);
+            rgbTxt.Location = new Point(47, 226);
             rgbTxt.Name = "rgbTxt";
             rgbTxt.ReadOnly = true;
             rgbTxt.Size = new Size(118, 23);
