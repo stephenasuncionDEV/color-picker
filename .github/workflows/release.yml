@@ -1,0 +1,105 @@
+name: .NET WinForms Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  PROJECT_PATH: 'color-picker.csproj'
+  APP_NAME: 'color-picker'
+  DOTNET_VERSION: '8.0.x'
+  OUTPUT_DIR: './publish_output'
+
+jobs:
+  build-and-release:
+    name: Build and Release ${{ env.APP_NAME }}
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+
+    - name: Build project
+      run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
+
+    - name: Publish project
+      run: >
+        dotnet publish ${{ env.PROJECT_PATH }}
+        --configuration Release
+        --output ${{ env.OUTPUT_DIR }}
+        --no-build
+        -p:PublishSingleFile=false  # Consider 'true' for a single .exe (may have limitations)
+        # -p:IncludeNativeLibrariesForSelfExtract=true # Useful if PublishSingleFile=true
+        -r win-x64                  # Specify runtime (e.g., win-x64, win-arm64). Ensures self-contained includes correct native binaries.
+        --self-contained true       # Set to 'false' if users must have the .NET runtime installed.
+        # Note: Ensure your .csproj is configured with <OutputType>WinExe</OutputType> for WinForms.
+        # If you use a publish profile, you can add:
+        # -p:PublishProfile=Properties\PublishProfiles\FolderProfile.pub # Adjust path to your .pubxml file
+
+    - name: Determine Release Version and Tag
+      id: version_info
+      shell: bash # Uses bash for string manipulation
+      run: |
+        if [[ "${{ github.ref_type }}" == "tag" ]]; then
+          TAG_NAME="${{ github.ref_name }}"
+          # Strip 'v' prefix for version if present, otherwise use tag name as version
+          if [[ "${{ github.ref_name }}" == v* ]]; then
+            VERSION="${{ github.ref_name#v }}"
+          else
+            VERSION="${{ github.ref_name }}"
+          fi
+        else
+          # For non-tag pushes (e.g., to main), create a build identifier
+          # You might want a more sophisticated versioning scheme here (e.g., using GitVersion)
+          VERSION="0.0.${{ github.run_number }}-${{ github.sha:0:7 }}"
+          TAG_NAME="build-${VERSION}"
+        fi
+        echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
+        echo "RELEASE_VERSION=${VERSION}" >> $GITHUB_ENV
+        echo "Determined Release Tag: ${TAG_NAME}"
+        echo "Determined Release Version: ${VERSION}"
+
+    - name: Archive publish output
+      shell: pwsh # PowerShell is readily available on Windows runners
+      run: |
+        $zipFileName = "${{ env.APP_NAME }}-${{ env.RELEASE_VERSION }}.zip"
+        Compress-Archive -Path ${{ env.OUTPUT_DIR }}/* -DestinationPath $zipFileName -Force
+        echo "ASSET_PATH=./$zipFileName" >> $GITHUB_ENV
+        echo "ASSET_NAME=$zipFileName" >> $GITHUB_ENV
+        echo "Archived application to $zipFileName"
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ env.TAG_NAME }}
+        name: ${{ env.APP_NAME }} Release ${{ env.RELEASE_VERSION }}
+        body: |
+          Automated release for **${{ env.APP_NAME }} v${{ env.RELEASE_VERSION }}**.
+
+          Triggered by: `${{ github.event_name }}`
+          Branch/Tag: `${{ github.ref }}`
+          Commit: `${{ github.sha }}`
+
+          **Artifacts:**
+          - `${{ env.ASSET_NAME }}` (Application files)
+        draft: false
+        prerelease: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        files: ${{ env.ASSET_PATH }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
