@@ -40,6 +40,7 @@
             savedList = new ListBox();
             notifyIcon1 = new NotifyIcon(components);
             contextMenuStrip1 = new ContextMenuStrip(components);
+            openMenuItem = new ToolStripMenuItem();
             toggleMenuItem = new ToolStripMenuItem();
             showOnPickMenuItem = new ToolStripMenuItem();
             notifyOnPickMenuItem = new ToolStripMenuItem();
@@ -143,10 +144,16 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { toggleMenuItem, showOnPickMenuItem, notifyOnPickMenuItem, closeMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { openMenuItem, toggleMenuItem, showOnPickMenuItem, notifyOnPickMenuItem, closeMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(150, 92);
+            contextMenuStrip1.Size = new Size(150, 114);
             contextMenuStrip1.ItemClicked += contextMenuStrip1_ItemClicked;
+            // 
+            // openMenuItem
+            // 
+            openMenuItem.Name = "openMenuItem";
+            openMenuItem.Size = new Size(149, 22);
+            openMenuItem.Text = "Open";
             // 
             // toggleMenuItem
             // 
@@ -156,14 +163,14 @@
             // 
             // showOnPickMenuItem
             // 
+            showOnPickMenuItem.Checked = true;
+            showOnPickMenuItem.CheckState = CheckState.Checked;
             showOnPickMenuItem.Name = "showOnPickMenuItem";
             showOnPickMenuItem.Size = new Size(149, 22);
             showOnPickMenuItem.Text = "Show on pick";
             // 
             // notifyOnPickMenuItem
             // 
-            notifyOnPickMenuItem.Checked = true;
-            notifyOnPickMenuItem.CheckState = CheckState.Checked;
             notifyOnPickMenuItem.Name = "notifyOnPickMenuItem";
             notifyOnPickMenuItem.Size = new Size(149, 22);
             notifyOnPickMenuItem.Text = "Notify on pick";
@@ -275,5 +282,6 @@
         private ToolStripMenuItem showOnPickMenuItem;
         private Button clearBtn;
         private ToolStripMenuItem notifyOnPickMenuItem;
+        private ToolStripMenuItem openMenuItem;
     }
 }

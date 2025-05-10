@@ -12,6 +12,8 @@ namespace color_picker
         static extern short GetAsyncKeyState(int vKey);
 
         const int VK_MBUTTON = 0x04;
+        const int VK_ESC = 0x1B;
+        const int VK_BACKTICK = 0xC0;
 
         public Form1()
         {
@@ -30,7 +32,7 @@ namespace color_picker
             }
 
             worker.Start();
-            statusLabel.Text = "Running (press scroll wheel to pick)";
+            statusLabel.Text = "Running (press ` or scroll wheel to pick)";
             pickBtn.Text = "Stop Picking";
             toggleMenuItem.Text = "Stop Picking";
         }
@@ -78,7 +80,12 @@ namespace color_picker
                     colorDisplay.Image = zoomedBmp;
                     colorDisplay.Invalidate();
 
-                    if ((GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0)
+                    if ((GetAsyncKeyState(VK_ESC) & 0x8000) != 0)
+                    {
+                        TogglePicking();
+                    }
+
+                    if ((GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0 || (GetAsyncKeyState(VK_BACKTICK) & 0x8000) != 0)
                     {
                         var lastItem = savedList.Items.Count > 0 ? savedList.Items[savedList.Items.Count - 1] : null;
                         if (lastItem != null && lastItem.ToString() == hexTxt.Text)
@@ -103,6 +110,7 @@ namespace color_picker
 
                         if (notifyOnPickMenuItem.Checked)
                         {
+                            notifyIcon1.BalloonTipTitle = "Color Picked";
                             notifyIcon1.BalloonTipText = $"Picked color: {hexTxt.Text}";
                             notifyIcon1.ShowBalloonTip(300);
                         }
@@ -170,6 +178,8 @@ namespace color_picker
         {
             if (FormWindowState.Minimized == this.WindowState)
             {
+                notifyIcon1.BalloonTipTitle = "Color Picker is still running";
+                notifyIcon1.BalloonTipText = "Click to re-open the app";
                 notifyIcon1.Visible = true;
                 notifyIcon1.ShowBalloonTip(500);
                 this.Hide();
@@ -198,7 +208,12 @@ namespace color_picker
             if (e.ClickedItem != null)
             {
                 ToolStripItem item = e.ClickedItem;
-                if (item.Name == "toggleMenuItem")
+                if (item.Name == "openMenuItem")
+                {
+                    this.Show();
+                    this.WindowState = FormWindowState.Normal;
+                }
+                else if (item.Name == "toggleMenuItem")
                 {
                     TogglePicking();
                 }
