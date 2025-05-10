@@ -83,6 +83,12 @@ namespace color_picker
                         }
 
                         Clipboard.SetText(hexTxt.Text);
+
+                        if (FormWindowState.Minimized == this.WindowState)
+                        {
+                            this.Show();
+                            this.WindowState = FormWindowState.Normal;
+                        }
                     }
                 }
             }
@@ -165,6 +171,33 @@ namespace color_picker
         {
             this.Show();
             this.WindowState = FormWindowState.Normal;
+        }
+
+        private void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            if (e.ClickedItem != null)
+            {
+                ToolStripItem item = e.ClickedItem;
+                if (item.Name == "toggleMenuItem")
+                {
+                    if (worker.Enabled)
+                    {
+                        worker.Stop();
+                        statusLabel.Text = "Idle";
+                        item.Text = "Stop";
+                    }
+                    else
+                    {
+                        worker.Start();
+                        statusLabel.Text = "Running (press scroll wheel to pick)";
+                        item.Text = "Start";
+                    }
+                }
+                else if (item.Name == "closeMenuItem")
+                {
+                    this.Close();
+                }
+            }
         }
     }
 }
