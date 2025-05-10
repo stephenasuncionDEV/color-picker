@@ -1,6 +1,6 @@
 # Color Picker
 
-> Simple color picker made with C# winforms
+> A simple color picker application built using .NET WinForms.
 
 ## Preview
 ![Preview](./preview.png?v2)
