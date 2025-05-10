@@ -26,6 +26,7 @@ namespace color_picker
                 statusLabel.Text = "Idle";
                 pickBtn.Text = "Pick Color";
                 toggleMenuItem.Text = "Pick Color";
+                return;
             }
 
             worker.Start();

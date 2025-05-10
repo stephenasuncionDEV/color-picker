@@ -3,4 +3,4 @@
 > A simple color picker application built using .NET WinForms.
 
 ## Preview
-![Preview](./preview.png?v2)
+![Preview](./preview.png?v3)
