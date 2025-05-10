@@ -8,15 +8,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
-env:
-  PROJECT_PATH: 'color-picker.csproj'
-  APP_NAME: 'color-picker'
-  DOTNET_VERSION: '8.0.x'
-  OUTPUT_DIR: './publish_output'
-
 jobs:
   build-and-release:
-    name: Build and Release ${{ env.APP_NAME }}
+    name: Build and Release ${{ vars.APP_NAME }}
     runs-on: windows-latest
     permissions:
       contents: write
@@ -30,19 +24,19 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+        dotnet-version: ${{ vars.DOTNET_VERSION }}
 
     - name: Restore dependencies
-      run: dotnet restore ${{ env.PROJECT_PATH }}
+      run: dotnet restore ${{ vars.PROJECT_PATH }}
 
     - name: Build project
-      run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
+      run: dotnet build ${{ vars.PROJECT_PATH }} --configuration Release --no-restore
 
     - name: Publish project
       run: >
-        dotnet publish ${{ env.PROJECT_PATH }}
+        dotnet publish ${{ vars.PROJECT_PATH }}
         --configuration Release
-        --output ${{ env.OUTPUT_DIR }}
+        --output ${{ vars.OUTPUT_DIR }}
         --no-build
         -p:PublishSingleFile=false  # Consider 'true' for a single .exe (may have limitations)
         # -p:IncludeNativeLibrariesForSelfExtract=true # Useful if PublishSingleFile=true
@@ -54,22 +48,25 @@ jobs:
 
     - name: Determine Release Version and Tag
       id: version_info
-      shell: bash # Uses bash for string manipulation
+      shell: bash
       run: |
-        if [[ "${{ github.ref_type }}" == "tag" ]]; then
-          TAG_NAME="${{ github.ref_name }}"
-          # Strip 'v' prefix for version if present, otherwise use tag name as version
-          if [[ "${{ github.ref_name }}" == v* ]]; then
-            VERSION="${{ github.ref_name#v }}"
+        REF_TYPE="${{ github.ref_type }}"
+        REF_NAME="${{ github.ref_name }}"
+        SHA="${{ github.sha }}"
+        RUN_NUMBER="${{ github.run_number }}"
+
+        if [[ "$REF_TYPE" == "tag" ]]; then
+          TAG_NAME="$REF_NAME"
+          if [[ "$REF_NAME" == v* ]]; then
+            VERSION="${REF_NAME#v}"
           else
-            VERSION="${{ github.ref_name }}"
+            VERSION="$REF_NAME"
           fi
         else
-          # For non-tag pushes (e.g., to main), create a build identifier
-          # You might want a more sophisticated versioning scheme here (e.g., using GitVersion)
-          VERSION="0.0.${{ github.run_number }}-${{ github.sha:0:7 }}"
+          VERSION="0.0.${RUN_NUMBER}-${SHA:0:7}"
           TAG_NAME="build-${VERSION}"
         fi
+
         echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
         echo "RELEASE_VERSION=${VERSION}" >> $GITHUB_ENV
         echo "Determined Release Tag: ${TAG_NAME}"
@@ -78,8 +75,8 @@ jobs:
     - name: Archive publish output
       shell: pwsh # PowerShell is readily available on Windows runners
       run: |
-        $zipFileName = "${{ env.APP_NAME }}-${{ env.RELEASE_VERSION }}.zip"
-        Compress-Archive -Path ${{ env.OUTPUT_DIR }}/* -DestinationPath $zipFileName -Force
+        $zipFileName = "${{ vars.APP_NAME }}-${{ env.RELEASE_VERSION }}.zip"
+        Compress-Archive -Path ${{ vars.OUTPUT_DIR }}/* -DestinationPath $zipFileName -Force
         echo "ASSET_PATH=./$zipFileName" >> $GITHUB_ENV
         echo "ASSET_NAME=$zipFileName" >> $GITHUB_ENV
         echo "Archived application to $zipFileName"
@@ -88,9 +85,9 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ env.TAG_NAME }}
-        name: ${{ env.APP_NAME }} Release ${{ env.RELEASE_VERSION }}
+        name: ${{ vars.APP_NAME }} Release ${{ env.RELEASE_VERSION }}
         body: |
-          Automated release for **${{ env.APP_NAME }} v${{ env.RELEASE_VERSION }}**.
+          Automated release for **${{ vars.APP_NAME }} v${{ env.RELEASE_VERSION }}**.
 
           Triggered by: `${{ github.event_name }}`
           Branch/Tag: `${{ github.ref }}`
