@@ -41,12 +41,12 @@
             notifyIcon1 = new NotifyIcon(components);
             contextMenuStrip1 = new ContextMenuStrip(components);
             toggleMenuItem = new ToolStripMenuItem();
+            closeMenuItem = new ToolStripMenuItem();
             worker = new System.Windows.Forms.Timer(components);
             statusStrip1 = new StatusStrip();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             statusLabel = new ToolStripStatusLabel();
             cancelOnPick = new CheckBox();
-            closeMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)colorDisplay).BeginInit();
             contextMenuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -66,9 +66,9 @@
             // 
             pickBtn.Location = new Point(12, 12);
             pickBtn.Name = "pickBtn";
-            pickBtn.Size = new Size(75, 23);
+            pickBtn.Size = new Size(86, 23);
             pickBtn.TabIndex = 1;
-            pickBtn.Text = "Pick";
+            pickBtn.Text = "Pick Color";
             pickBtn.UseVisualStyleBackColor = true;
             pickBtn.Click += pickBtn_Click;
             // 
@@ -131,7 +131,7 @@
             // 
             notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
             notifyIcon1.BalloonTipText = "Click to re-open the app";
-            notifyIcon1.BalloonTipTitle = "Color Picker is still open";
+            notifyIcon1.BalloonTipTitle = "Color Picker is still running";
             notifyIcon1.ContextMenuStrip = contextMenuStrip1;
             notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
             notifyIcon1.Text = "Color Picker";
@@ -142,14 +142,20 @@
             // 
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { toggleMenuItem, closeMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(104, 48);
+            contextMenuStrip1.Size = new Size(129, 48);
             contextMenuStrip1.ItemClicked += contextMenuStrip1_ItemClicked;
             // 
             // toggleMenuItem
             // 
             toggleMenuItem.Name = "toggleMenuItem";
-            toggleMenuItem.Size = new Size(103, 22);
-            toggleMenuItem.Text = "Start";
+            toggleMenuItem.Size = new Size(128, 22);
+            toggleMenuItem.Text = "Pick Color";
+            // 
+            // closeMenuItem
+            // 
+            closeMenuItem.Name = "closeMenuItem";
+            closeMenuItem.Size = new Size(128, 22);
+            closeMenuItem.Text = "Close";
             // 
             // worker
             // 
@@ -187,12 +193,6 @@
             cancelOnPick.TabIndex = 10;
             cancelOnPick.Text = "Cancel on pick";
             cancelOnPick.UseVisualStyleBackColor = true;
-            // 
-            // closeMenuItem
-            // 
-            closeMenuItem.Name = "closeMenuItem";
-            closeMenuItem.Size = new Size(103, 22);
-            closeMenuItem.Text = "Close";
             // 
             // Form1
             // 

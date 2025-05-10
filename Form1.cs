@@ -18,26 +18,35 @@ namespace color_picker
             InitializeComponent();
         }
 
-        private void pickBtn_Click(object sender, EventArgs e)
+        bool TogglePicking()
         {
             if (worker.Enabled)
             {
                 worker.Stop();
                 statusLabel.Text = "Idle";
+                pickBtn.Text = "Pick Color";
+                contextMenuStrip1.Items[0].Text = "Pick Color";
+                return false;
             }
-            else
-            {
-                worker.Start();
-                statusLabel.Text = "Running (press scroll wheel to pick)";
-            }
+
+            worker.Start();
+            statusLabel.Text = "Running (press scroll wheel to pick)";
+            pickBtn.Text = "Stop Picking";
+            contextMenuStrip1.Items[0].Text = "Stop Picking";
+            return true;
+        }
+
+        private void pickBtn_Click(object sender, EventArgs e)
+        {
+            TogglePicking();
         }
 
         private void worker_Tick(object sender, EventArgs e)
         {
             if (GetCursorPos(out Point cursorPosition))
             {
-                int zoomAreaSize = 15; // 10x10 pixels around the cursor
-                int zoomScale = 10;    // Scale each pixel to 10x10
+                int zoomAreaSize = 15;
+                int zoomScale = 10;
                 int captureSize = zoomAreaSize;
 
                 Rectangle captureRect = new Rectangle(
@@ -56,11 +65,9 @@ namespace color_picker
 
                     Color pixelColor = bmp.GetPixel(captureSize / 2, captureSize / 2);
 
-                    // update text fields
                     hexTxt.Text = $"#{pixelColor.R:X2}{pixelColor.G:X2}{pixelColor.B:X2}";
                     rgbTxt.Text = $"RGB({pixelColor.R}, {pixelColor.G}, {pixelColor.B})";
 
-                    // create zoomed image
                     Bitmap zoomedBmp = new Bitmap(captureSize * zoomScale, captureSize * zoomScale);
                     using (Graphics gZoom = Graphics.FromImage(zoomedBmp))
                     {
@@ -72,14 +79,19 @@ namespace color_picker
                     colorDisplay.Image = zoomedBmp;
                     colorDisplay.Invalidate();
 
-                    // detect mouse wheel click
                     if ((GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0)
                     {
+                        var lastItem = savedList.Items.Count > 0 ? savedList.Items[savedList.Items.Count - 1] : null;
+                        if (lastItem != null && lastItem.ToString() == hexTxt.Text)
+                        {
+                            return;
+                        }
+
                         savedList.Items.Add(hexTxt.Text);
+
                         if (cancelOnPick.Checked)
                         {
-                            worker.Stop();
-                            statusLabel.Text = "Idle";
+                            TogglePicking();
                         }
 
                         Clipboard.SetText(hexTxt.Text);
@@ -88,6 +100,12 @@ namespace color_picker
                         {
                             this.Show();
                             this.WindowState = FormWindowState.Normal;
+                        }
+
+                        if (savedList.Items.Count > 0)
+                        {
+                            savedList.TopIndex = savedList.Items.Count - 1;
+                            savedList.SelectedIndex = savedList.Items.Count - 1;
                         }
                     }
                 }
@@ -120,17 +138,13 @@ namespace color_picker
             {
                 gridPen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
 
-                // draw grid
                 for (int i = 0; i <= pixels; i++)
                 {
                     int pos = i * scale;
-                    // vertical lines
                     e.Graphics.DrawLine(gridPen, pos, 0, pos, zoomedSize);
-                    // horizontal lines
                     e.Graphics.DrawLine(gridPen, 0, pos, zoomedSize, pos);
                 }
 
-                // highlight center pixel with red rectangle
                 int centerPixel = pixels / 2;
                 Rectangle centerRect = new Rectangle(centerPixel * scale, centerPixel * scale, scale, scale);
                 e.Graphics.DrawRectangle(centerPen, centerRect);
@@ -146,6 +160,7 @@ namespace color_picker
                 MessageBox.Show($"Copied {selectedColor} to clipboard", "Color Picker", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+       
         private void Form1_Resize(object sender, EventArgs e)
         {
             if (FormWindowState.Minimized == this.WindowState)
@@ -180,18 +195,8 @@ namespace color_picker
                 ToolStripItem item = e.ClickedItem;
                 if (item.Name == "toggleMenuItem")
                 {
-                    if (worker.Enabled)
-                    {
-                        worker.Stop();
-                        statusLabel.Text = "Idle";
-                        item.Text = "Stop";
-                    }
-                    else
-                    {
-                        worker.Start();
-                        statusLabel.Text = "Running (press scroll wheel to pick)";
-                        item.Text = "Start";
-                    }
+                    var status = TogglePicking();
+                    item.Text = status ? "Stop Picking" : "Pick Color";
                 }
                 else if (item.Name == "closeMenuItem")
                 {
