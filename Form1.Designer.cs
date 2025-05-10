@@ -125,9 +125,13 @@
             // 
             // notifyIcon1
             // 
+            notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
+            notifyIcon1.BalloonTipText = "Click to re-open the app";
+            notifyIcon1.BalloonTipTitle = "Color Picker is still open";
             notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
             notifyIcon1.Text = "Color Picker";
-            notifyIcon1.Visible = true;
+            notifyIcon1.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+            notifyIcon1.DoubleClick += notifyIcon1_DoubleClick;
             // 
             // worker
             // 
@@ -188,6 +192,7 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Color Picker by Typedef";
             TopMost = true;
+            Resize += Form1_Resize;
             ((System.ComponentModel.ISupportInitialize)colorDisplay).EndInit();
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
