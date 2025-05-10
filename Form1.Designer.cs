@@ -121,6 +121,7 @@
             savedList.Name = "savedList";
             savedList.Size = new Size(142, 244);
             savedList.TabIndex = 8;
+            savedList.DoubleClick += savedList_DoubleClick;
             // 
             // notifyIcon1
             // 

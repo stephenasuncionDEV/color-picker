@@ -81,6 +81,8 @@ namespace color_picker
                             worker.Stop();
                             statusLabel.Text = "Idle";
                         }
+
+                        Clipboard.SetText(hexTxt.Text);
                     }
                 }
             }
@@ -126,6 +128,16 @@ namespace color_picker
                 int centerPixel = pixels / 2;
                 Rectangle centerRect = new Rectangle(centerPixel * scale, centerPixel * scale, scale, scale);
                 e.Graphics.DrawRectangle(centerPen, centerRect);
+            }
+        }
+
+        private void savedList_DoubleClick(object sender, EventArgs e)
+        {
+            if (savedList.SelectedItem != null)
+            {
+                string selectedColor = savedList.SelectedItem.ToString();
+                Clipboard.SetText(selectedColor);
+                MessageBox.Show($"Copied {selectedColor} to clipboard", "Color Picker", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
     }

@@ -75,11 +75,10 @@ jobs:
     - name: Archive publish output
       shell: pwsh # PowerShell is readily available on Windows runners
       run: |
-        $zipFileName = "${{ vars.APP_NAME }}-${{ env.RELEASE_VERSION }}.zip"
-        Compress-Archive -Path ${{ vars.OUTPUT_DIR }}/* -DestinationPath $zipFileName -Force
+        zipFileName="${{ vars.APP_NAME }}-${{ env.RELEASE_VERSION }}.zip"
+        zip -r "$zipFileName" ${{ vars.OUTPUT_DIR }}
         echo "ASSET_PATH=./$zipFileName" >> $GITHUB_ENV
         echo "ASSET_NAME=$zipFileName" >> $GITHUB_ENV
-        echo "Archived application to $zipFileName"
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
