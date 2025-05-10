@@ -18,22 +18,20 @@ namespace color_picker
             InitializeComponent();
         }
 
-        bool TogglePicking()
+        void TogglePicking()
         {
             if (worker.Enabled)
             {
                 worker.Stop();
                 statusLabel.Text = "Idle";
                 pickBtn.Text = "Pick Color";
-                contextMenuStrip1.Items[0].Text = "Pick Color";
-                return false;
+                toggleMenuItem.Text = "Pick Color";
             }
 
             worker.Start();
             statusLabel.Text = "Running (press scroll wheel to pick)";
             pickBtn.Text = "Stop Picking";
-            contextMenuStrip1.Items[0].Text = "Stop Picking";
-            return true;
+            toggleMenuItem.Text = "Stop Picking";
         }
 
         private void pickBtn_Click(object sender, EventArgs e)
@@ -96,10 +94,16 @@ namespace color_picker
 
                         Clipboard.SetText(hexTxt.Text);
 
-                        if (FormWindowState.Minimized == this.WindowState)
+                        if (showOnPickMenuItem.Checked && FormWindowState.Minimized == this.WindowState)
                         {
                             this.Show();
                             this.WindowState = FormWindowState.Normal;
+                        }
+
+                        if (notifyOnPickMenuItem.Checked)
+                        {
+                            notifyIcon1.BalloonTipText = $"Picked color: {hexTxt.Text}";
+                            notifyIcon1.ShowBalloonTip(300);
                         }
 
                         if (savedList.Items.Count > 0)
@@ -160,7 +164,7 @@ namespace color_picker
                 MessageBox.Show($"Copied {selectedColor} to clipboard", "Color Picker", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-       
+
         private void Form1_Resize(object sender, EventArgs e)
         {
             if (FormWindowState.Minimized == this.WindowState)
@@ -195,14 +199,26 @@ namespace color_picker
                 ToolStripItem item = e.ClickedItem;
                 if (item.Name == "toggleMenuItem")
                 {
-                    var status = TogglePicking();
-                    item.Text = status ? "Stop Picking" : "Pick Color";
+                    TogglePicking();
+                }
+                else if (item.Name == "showOnPickMenuItem")
+                {
+                    showOnPickMenuItem.Checked = !showOnPickMenuItem.Checked;
+                }
+                else if (item.Name == "notifyOnPickMenuItem")
+                {
+                    notifyOnPickMenuItem.Checked = !notifyOnPickMenuItem.Checked;
                 }
                 else if (item.Name == "closeMenuItem")
                 {
                     this.Close();
                 }
             }
+        }
+
+        private void clearBtn_Click(object sender, EventArgs e)
+        {
+            savedList.Items.Clear();
         }
     }
 }

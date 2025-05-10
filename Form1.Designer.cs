@@ -41,12 +41,15 @@
             notifyIcon1 = new NotifyIcon(components);
             contextMenuStrip1 = new ContextMenuStrip(components);
             toggleMenuItem = new ToolStripMenuItem();
+            showOnPickMenuItem = new ToolStripMenuItem();
+            notifyOnPickMenuItem = new ToolStripMenuItem();
             closeMenuItem = new ToolStripMenuItem();
             worker = new System.Windows.Forms.Timer(components);
             statusStrip1 = new StatusStrip();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             statusLabel = new ToolStripStatusLabel();
             cancelOnPick = new CheckBox();
+            clearBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)colorDisplay).BeginInit();
             contextMenuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -66,7 +69,7 @@
             // 
             pickBtn.Location = new Point(12, 12);
             pickBtn.Name = "pickBtn";
-            pickBtn.Size = new Size(86, 23);
+            pickBtn.Size = new Size(88, 23);
             pickBtn.TabIndex = 1;
             pickBtn.Text = "Pick Color";
             pickBtn.UseVisualStyleBackColor = true;
@@ -140,21 +143,35 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { toggleMenuItem, closeMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { toggleMenuItem, showOnPickMenuItem, notifyOnPickMenuItem, closeMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(129, 48);
+            contextMenuStrip1.Size = new Size(150, 92);
             contextMenuStrip1.ItemClicked += contextMenuStrip1_ItemClicked;
             // 
             // toggleMenuItem
             // 
             toggleMenuItem.Name = "toggleMenuItem";
-            toggleMenuItem.Size = new Size(128, 22);
+            toggleMenuItem.Size = new Size(149, 22);
             toggleMenuItem.Text = "Pick Color";
+            // 
+            // showOnPickMenuItem
+            // 
+            showOnPickMenuItem.Name = "showOnPickMenuItem";
+            showOnPickMenuItem.Size = new Size(149, 22);
+            showOnPickMenuItem.Text = "Show on pick";
+            // 
+            // notifyOnPickMenuItem
+            // 
+            notifyOnPickMenuItem.Checked = true;
+            notifyOnPickMenuItem.CheckState = CheckState.Checked;
+            notifyOnPickMenuItem.Name = "notifyOnPickMenuItem";
+            notifyOnPickMenuItem.Size = new Size(149, 22);
+            notifyOnPickMenuItem.Text = "Notify on pick";
             // 
             // closeMenuItem
             // 
             closeMenuItem.Name = "closeMenuItem";
-            closeMenuItem.Size = new Size(128, 22);
+            closeMenuItem.Size = new Size(149, 22);
             closeMenuItem.Text = "Close";
             // 
             // worker
@@ -194,11 +211,22 @@
             cancelOnPick.Text = "Cancel on pick";
             cancelOnPick.UseVisualStyleBackColor = true;
             // 
+            // clearBtn
+            // 
+            clearBtn.Location = new Point(257, 12);
+            clearBtn.Name = "clearBtn";
+            clearBtn.Size = new Size(62, 23);
+            clearBtn.TabIndex = 11;
+            clearBtn.Text = "Clear";
+            clearBtn.UseVisualStyleBackColor = true;
+            clearBtn.Click += clearBtn_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(331, 320);
+            Controls.Add(clearBtn);
             Controls.Add(cancelOnPick);
             Controls.Add(statusStrip1);
             Controls.Add(savedList);
@@ -244,5 +272,8 @@
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem toggleMenuItem;
         private ToolStripMenuItem closeMenuItem;
+        private ToolStripMenuItem showOnPickMenuItem;
+        private Button clearBtn;
+        private ToolStripMenuItem notifyOnPickMenuItem;
     }
 }
