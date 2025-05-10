@@ -180,7 +180,7 @@
             // 
             statusLabel.Name = "statusLabel";
             statusLabel.Size = new Size(26, 17);
-            statusLabel.Text = "idle";
+            statusLabel.Text = "Idle";
             // 
             // cancelOnPick
             // 
